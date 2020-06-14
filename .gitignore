@@ -227,3 +227,7 @@ typings/
 
 # next.js build output
 .next
+
+# Others
+.vscode/
+.DS_Store
