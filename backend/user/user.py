@@ -5,7 +5,6 @@ class User(object):
 
     def __init__(self, room_id: int, current_room_temp: float):
         super().__init__()
-        pass
 
     def request_on(self) -> bool:
         '''客户请求开机

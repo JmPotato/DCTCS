@@ -1,5 +1,7 @@
 # -*- coding utf-8 -*-
-from flask import Flask
+from user.user import User
+
+from flask import Flask, request
 app = Flask(__name__)
 
 
@@ -19,27 +21,27 @@ def hello_world():
 '''
 
 
-@app.route('/check_in')
+@app.route('/check_in', methods=['POST'])
 def check_in():
     pass
 
 
-@app.route('/adjust_temperature')
+@app.route('/adjust_temperature', methods=['POST'])
 def adjust_temperature():
     pass
 
 
-@app.route('/adjust_wind')
+@app.route('/adjust_wind', methods=['POST'])
 def adjust_wind():
     pass
 
 
-@app.route('/status_heartbeat')
+@app.route('/status_heartbeat', methods=['GET'])
 def status_heartbeat():
     pass
 
 
-@app.route('/get_room_bill')
+@app.route('/get_room_bill', methods=['GET'])
 def get_room_bill():
     pass
 
@@ -52,11 +54,11 @@ def get_room_bill():
 '''
 
 
-@app.route('/get_room_list')
+@app.route('/get_room_list', methods=['GET'])
 def get_room_list():
     pass
 
 
-@app.route('/get_room_detail')
+@app.route('/get_room_detail', methods=['GET'])
 def get_room_detail():
     pass

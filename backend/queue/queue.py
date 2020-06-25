@@ -1,4 +1,6 @@
 # -*- coding utf-8 -*-
+import heapq
+
 from ..service.service_obj import ServiceObj
 
 
@@ -8,6 +10,8 @@ class ServiceQueue(object):
 
     def __init__(self):
         super().__init__()
+        self._queue = []
+        self._index = 0
 
     def create_service_obj(self,
                            room_id: int,
@@ -25,17 +29,6 @@ class ServiceQueue(object):
         '''
         pass
 
-    def add(self, service_obj: ServiceObj) -> bool:
-        '''将服务对象加入队列
-
-        Args:
-            service_obj 服务对象
-
-        Returns:
-            bool 添加结果，True 为成功，False 为失败
-        '''
-        pass
-
     def count_pp(self):
         '''服务对象数自增
 
@@ -46,3 +39,18 @@ class ServiceQueue(object):
             None
         '''
         pass
+
+    def add(self, service_obj: ServiceObj) -> bool:
+        '''将服务对象加入队列
+
+        Args:
+            service_obj 服务对象
+
+        Returns:
+            bool 添加结果，True 为成功，False 为失败
+        '''
+        heapq.heappush(self._queue,
+                       (service_obj.priority, self._index, service_obj))
+
+    def pop(self) -> ServiceObj:
+        return heapq.heappop(self._queue)[-1]

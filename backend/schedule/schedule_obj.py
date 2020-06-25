@@ -3,17 +3,19 @@ class ScheduleObj(object):
     '''ScheduleObj 待调度对象的抽象（房间）
     '''
 
-    def __init__(self, room_id: int, current_room_temp: float):
+    def __init__(self, current_room_temp: float):
         super().__init__()
+        self.room_id = None
         self.power_on = False
-        self.room_id = room_id
         self.room_temp = current_room_temp
+
+        self.priority = 0
 
     def power_on(self) -> bool:
         self.power_on = True
         return self.power_on
 
-    def add_room(self) -> bool:
+    def add_room(self, room_id: int) -> bool:
         '''增加服务房间
 
         Args:
@@ -22,7 +24,8 @@ class ScheduleObj(object):
         Returns:
             bool 增加结果，True 为成功，False 为失败
         '''
-        pass
+        self.room_id = room_id
+        return True
 
     def is_room_list(self) -> bool:
         '''判断该房间是否在服务队列中
