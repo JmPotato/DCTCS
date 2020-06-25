@@ -12,3 +12,58 @@ class ScheduleObj(object):
     def power_on(self) -> bool:
         self.power_on = True
         return self.power_on
+
+    def add_room(self) -> bool:
+        '''增加服务房间
+
+        Args:
+            None
+
+        Returns:
+            bool 增加结果，True 为成功，False 为失败
+        '''
+        pass
+
+    def is_room_list(self) -> bool:
+        '''判断该房间是否在服务队列中
+
+        Args:
+            None
+
+        Returns:
+            bool 判断结果，True 为是，False 为否
+        '''
+        pass
+
+    def make_service_object(self) -> bool:
+        '''要求服务队列创建服务对象
+
+        Args:
+            room_id 房间号
+
+        Returns:
+            bool 创建结果，True 为成功，False 为失败
+        '''
+        pass
+
+    def change_target_temp(self, target_temp: float) -> bool:
+        '''要求服务队列修改服务对象的目标温度
+
+        Args:
+            target_temp 目标温度
+
+        Returns:
+            bool 修改结果，True 为成功，False 为失败
+        '''
+        pass
+
+    def change_fan_speed(self, fan_speed: float) -> bool:
+        '''要求服务队列修改服务对象的风速
+
+        Args:
+            fan_speed 目标风速
+
+        Returns:
+            bool 修改结果，True 为成功，False 为失败
+        '''
+        pass

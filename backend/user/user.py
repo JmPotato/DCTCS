@@ -22,7 +22,7 @@ class User(object):
         '''客户请求修改房间到目标温度
 
         Args:
-            None
+            target_temp 目标温度
 
         Returns:
             bool 修改结果，True 为成功，False 为失败
@@ -33,7 +33,7 @@ class User(object):
         '''客户请求修改房间送风速度
 
         Args:
-            None
+            fan_speed 目标风速
 
         Returns:
             bool 修改结果，True 为成功，False 为失败
