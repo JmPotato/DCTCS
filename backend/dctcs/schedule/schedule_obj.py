@@ -1,15 +1,20 @@
 # -*- coding utf-8 -*-
+from dctcs.schedule.scheduler import Scheduler
+
+
 class ScheduleObj(object):
     '''ScheduleObj 待调度对象的抽象（房间）
     '''
 
-    def __init__(self, current_room_temp: float):
+    def __init__(self, scheduler: Scheduler, cur_temp: float, cur_speed: str):
         super().__init__()
-        self.room_id = None
-        self.power_on = False
-        self.room_temp = current_room_temp
+        self.scheduler = scheduler
 
-        self.priority = 0
+        self.power_on = False
+
+        self.room_id = None
+        self.room_temp = cur_temp
+        self.room_speed = cur_speed
 
     def power_on(self) -> bool:
         self.power_on = True
@@ -38,7 +43,10 @@ class ScheduleObj(object):
         '''
         pass
 
-    def make_service_object(self) -> bool:
+    def make_service_object(
+            self,
+            target_temp: float,
+            target_speed: str) -> bool:
         '''要求服务队列创建服务对象
 
         Args:
@@ -47,7 +55,15 @@ class ScheduleObj(object):
         Returns:
             bool 创建结果，True 为成功，False 为失败
         '''
-        pass
+        self.service_object = self.scheduler.service_queue.create_service_obj(
+            self.room_id,
+            self.room_temp,
+            self.room_speed,
+            target_temp,
+            target_speed
+        )
+
+        return True
 
     def change_target_temp(self, target_temp: float) -> bool:
         '''要求服务队列修改服务对象的目标温度
@@ -58,9 +74,10 @@ class ScheduleObj(object):
         Returns:
             bool 修改结果，True 为成功，False 为失败
         '''
-        pass
+        self.make_service_object(target_temp, None)
+        return self.scheduler.service_queue.add_wait(self.service_object)
 
-    def change_fan_speed(self, fan_speed: float) -> bool:
+    def change_fan_speed(self, fan_speed: str) -> bool:
         '''要求服务队列修改服务对象的风速
 
         Args:
@@ -69,4 +86,5 @@ class ScheduleObj(object):
         Returns:
             bool 修改结果，True 为成功，False 为失败
         '''
-        pass
+        self.make_service_object(None, fan_speed)
+        return self.scheduler.service_queue.add_wait(self.service_object)
