@@ -2,12 +2,13 @@
 import datetime
 
 from math import ceil
+
 from peewee import (
     SqliteDatabase, Model,
     AutoField, CharField, IntegerField, BooleanField, DateTimeField
 )
 
-from dctcs.constdef import const
+from backend.dctcs.constdef import const
 
 
 class DataBase:
@@ -41,18 +42,21 @@ class DataBase:
         room_id = IntegerField()
         start_time = DateTimeField(default=datetime.datetime.strptime(
             '2020-06-25 19:00:00', "%Y-%m-%d %H:%M:%S"))
-        end_time = DateTimeField(default=datetime.datetime.now())
+        end_time = DateTimeField(null=True)
         start_temp = IntegerField()
         target_temp = IntegerField()
         mode = CharField()
         speed = CharField()
         fee_rate = IntegerField()
 
-    def cul_fee(self, detailed_item_id):
+    def cul_fee(self, detailed_item_id, get_stat=False):
         detailed_item = self.DetailedItemTable.filter(
             detailed_item_id=detailed_item_id)
         item = detailed_item[0]
-        duration = ceil((item.end_time - item.start_time).seconds / 60)
+        end_time = item.end_time
+        if get_stat and item.end_time is None:
+            end_time = datetime.datetime.now()
+        duration = ceil((end_time - item.start_time).seconds / 60)
         temp_change_rate = 0
         electrical_rate = 0
         if item.speed == "high":
@@ -71,10 +75,11 @@ class DataBase:
             if item.mode == "cold":  # 制冷模式
                 if temp_temp >= item.target_temp + 1:
                     work_time = (temp_temp - item.target_temp) / \
-                        temp_change_rate
+                                temp_change_rate
                     if work_time > duration - temp_time:  # 工作时间大于剩余时间
                         electrical_usage += (duration -
                                              temp_time) / electrical_rate
+                        temp_temp -= (duration - temp_time) * temp_change_rate
                         break
                     else:
                         electrical_usage += work_time / electrical_rate
@@ -88,10 +93,11 @@ class DataBase:
             else:  # 制热模式
                 if temp_temp <= item.target_temp - 1:
                     work_time = (item.target_temp - temp_temp) / \
-                        temp_change_rate
+                                temp_change_rate
                     if work_time > duration - temp_time:  # 工作时间大于剩余时间
                         electrical_usage += (duration -
                                              temp_time) / electrical_rate
+                        temp_temp += (duration - temp_time) * temp_change_rate
                         break
                     else:
                         electrical_usage += work_time / electrical_rate
@@ -103,6 +109,8 @@ class DataBase:
                 else:
                     break
         fee = format(float(electrical_usage), '.2f')
+        if get_stat:
+            return temp_temp, item.speed, electrical_usage, fee
         return fee
 
     def get_bill(self, room_id):
@@ -142,7 +150,7 @@ class DataBase:
         if len(empty_rooms) != 0:
             room_id = empty_rooms[0].room_id
             query = self.RoomTable.update(
-                is_empty=False, date_in=datetime.datetime.now())\
+                is_empty=False, date_in=datetime.datetime.now()) \
                 .where(self.RoomTable.room_id == room_id)
             query.execute()
             return room_id
@@ -168,7 +176,7 @@ class DataBase:
     def stop_air_conditioner(self, detailed_item_id):
         query = self.DetailedItemTable.update(
             end_time=datetime.datetime.now()
-        )\
+        ) \
             .where(self.DetailedItemTable.detailed_item_id == detailed_item_id)
         query.execute()
 
@@ -190,6 +198,21 @@ class DataBase:
             self.DetailedItemTable.room_id == room_id)
         query.execute()
         return bill, detailed_list
+
+    def get_room_stat(self, room_id):
+        states = self.DetailedItemTable.filter(room_id=room_id)
+        state = states[-1]
+        if state.end_time is None:
+            temp_temp, speed, electrical_usage, fee = self.cul_fee(state.detailed_item_id, True)
+        else:
+            temp_temp = 25
+            speed = "stop"
+            _, _, electrical_usage, fee = self.cul_fee(state.detailed_item_id, True)
+        for i in states[:-1]:
+            _, _, temp_electrical_usage, temp_fee = self.cul_fee(i.detailed_item_id, True)
+            electrical_usage += temp_electrical_usage
+            fee += temp_fee
+        return [temp_temp, speed, electrical_usage, fee]
 
 
 db_handler = DataBase()  # 实例化

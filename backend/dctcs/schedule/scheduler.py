@@ -3,6 +3,7 @@ import logging
 
 from dctcs.queue.service_queue import ServiceQueue
 from time import sleep
+from backend.dctcs.db.models import db_handler
 
 
 class Scheduler(object):
@@ -81,4 +82,4 @@ class Scheduler(object):
         def query(self, room_id: int):
             '''查询函数，用于响应心跳请求，返回当前房间的状态：温度，风速，耗电和费用
             '''
-            pass
+            return db_handler.get_room_stat(room_id)
