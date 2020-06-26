@@ -231,3 +231,4 @@ typings/
 # Others
 .vscode/
 .DS_Store
+*.db
