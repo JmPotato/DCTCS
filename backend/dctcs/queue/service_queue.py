@@ -62,21 +62,36 @@ class ServiceQueue(object):
                 self.wait_queue,
                 (
                     service_obj.priority,  # 优先级
-                    service_obj.wait_clock,  # 等待时长
                     self.index,  # 加入顺序
                     service_obj  # 服务对象
                 )
             )
+            self.index += 1
         return True
+
+    def get_wait(self) -> ServiceObj:
+        '''从等待/待调度队列获取优先级最高的服务对象
+
+        Args:
+            None
+
+        Returns:
+            service_obj 服务对象
+        '''
+        with self.wait_lock:
+            serv_objs = heapq.nsmallest(1, self.wait_queue)
+            if not serv_objs:
+                return None
+            return serv_objs[0][-1]
 
     def pop_wait(self) -> ServiceObj:
         '''从等待/待调度队列弹出优先级最高的服务对象
 
         Args:
-            service_obj 服务对象
+            None
 
         Returns:
-            bool 添加结果，True 为成功，False 为失败
+            service_obj 服务对象
         '''
         with self.wait_lock:
             if self.wait_count == 0:
@@ -84,6 +99,7 @@ class ServiceQueue(object):
             self.wait_count -= 1
             serv_obj = heapq.heappop(self.wait_queue)[-1]
             serv_obj.wait_clock = 0  # 清空等待时长
+        return serv_obj
 
     def add_service(self, service_obj: ServiceObj) -> bool:
         '''将服务对象加入服务队列
@@ -95,12 +111,13 @@ class ServiceQueue(object):
             bool 添加结果，True 为成功，False 为失败
         '''
         with self.service_lock:
-            if not self.service_queue[service_obj.room_id]:
+            if service_obj.room_id not in self.service_queue:
                 self.serivce_count += 1
             self.service_queue[service_obj.room_id] = service_obj
             # 初始化时钟
             service_obj.wait_clock = 0
             service_obj.service_clock = 0
+            service_obj.start_serve()
         return True
 
     def pop_service_by_room_id(self, room_id: int) -> ServiceObj:
@@ -110,7 +127,7 @@ class ServiceQueue(object):
             room_id 房间号
 
         Returns:
-            bool 添加结果，True 为成功，False 为失败
+            service_obj 服务对象
         '''
         with self.service_lock:
             service_obj = self.service_queue.pop(room_id)
@@ -118,6 +135,7 @@ class ServiceQueue(object):
             service_obj.wait_clock = 0
             service_obj.service_clock = 0
             self.serivce_count -= 1
+            service_obj.stop_serve()
         return service_obj
 
     def get_lowest_priority(self) -> ServiceObj:
@@ -135,7 +153,7 @@ class ServiceQueue(object):
             # 先遍历判断最小的优先级
             for room_id in self.service_queue:
                 if lowest_priority is None or \
-                        self.service_queue[room_id].priority < lowest_priority:
+                        self.service_queue[room_id].priority > lowest_priority:
                     lowest_priority = self.service_queue[room_id].priority
             for room_id in self.service_queue:
                 if self.service_queue[room_id].priority == lowest_priority:
@@ -146,23 +164,4 @@ class ServiceQueue(object):
             if longest_obj is None or \
                     longest_obj.service_clock < obj.service_clock:
                 longest_obj = obj
-        return longest_obj
-
-    def get_longest(self) -> ServiceObj:
-        '''从服务队列调出服务时间最长者
-
-        Args:
-            None
-
-        Returns:
-            service_obj 服务对象
-        '''
-        longest_obj = None
-        with self.service_lock:
-            for room_id in self.service_queue:
-                if longest_obj is None or \
-                    self.service_queue[room_id].service_clock > \
-                        longest_obj.service_clock:
-                    longest_obj = self.service_queue[room_id]
-
         return longest_obj

@@ -1,10 +1,9 @@
 import React from "react"
-import Layout from "../components/layout"
 
 export default function Home() {
   return (
-    <Layout>
-      <a href="/">Check in</a>
-    </Layout>
+      <div>{
+        window.location.href='./check_in'
+    }</div>
   )
 }

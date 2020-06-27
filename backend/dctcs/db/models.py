@@ -8,7 +8,7 @@ from peewee import (
     AutoField, CharField, IntegerField, BooleanField, DateTimeField
 )
 
-from backend.dctcs.constdef import const
+from dctcs.constdef import const
 
 
 class DataBase:
@@ -75,7 +75,7 @@ class DataBase:
             if item.mode == "cold":  # 制冷模式
                 if temp_temp >= item.target_temp + 1:
                     work_time = (temp_temp - item.target_temp) / \
-                                temp_change_rate
+                        temp_change_rate
                     if work_time > duration - temp_time:  # 工作时间大于剩余时间
                         electrical_usage += (duration -
                                              temp_time) / electrical_rate
@@ -93,7 +93,7 @@ class DataBase:
             else:  # 制热模式
                 if temp_temp <= item.target_temp - 1:
                     work_time = (item.target_temp - temp_temp) / \
-                                temp_change_rate
+                        temp_change_rate
                     if work_time > duration - temp_time:  # 工作时间大于剩余时间
                         electrical_usage += (duration -
                                              temp_time) / electrical_rate
@@ -108,7 +108,7 @@ class DataBase:
                     continue
                 else:
                     break
-        fee = format(float(electrical_usage), '.2f')
+        fee = float(electrical_usage)
         if get_stat:
             return temp_temp, item.speed, electrical_usage, fee
         return fee
@@ -203,13 +203,16 @@ class DataBase:
         states = self.DetailedItemTable.filter(room_id=room_id)
         state = states[-1]
         if state.end_time is None:
-            temp_temp, speed, electrical_usage, fee = self.cul_fee(state.detailed_item_id, True)
+            temp_temp, speed, electrical_usage, fee = self.cul_fee(
+                state.detailed_item_id, True)
         else:
             temp_temp = 25
             speed = "stop"
-            _, _, electrical_usage, fee = self.cul_fee(state.detailed_item_id, True)
+            _, _, electrical_usage, fee = self.cul_fee(
+                state.detailed_item_id, True)
         for i in states[:-1]:
-            _, _, temp_electrical_usage, temp_fee = self.cul_fee(i.detailed_item_id, True)
+            _, _, temp_electrical_usage, temp_fee = self.cul_fee(
+                i.detailed_item_id, True)
             electrical_usage += temp_electrical_usage
             fee += temp_fee
         return [temp_temp, speed, electrical_usage, fee]

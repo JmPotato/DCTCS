@@ -1,0 +1,52 @@
+@host = 127.0.0.1
+@port = 5000
+
+### 入住
+POST http://{{host}}:{{port}}/check_in HTTP/1.1
+
+
+###
+GET http://{{host}}:{{port}}/status_heartbeat?room_id=1 HTTP/1.1
+
+###
+GET http://{{host}}:{{port}}/status_heartbeat?room_id=2 HTTP/1.1
+
+###
+GET http://{{host}}:{{port}}/status_heartbeat?room_id=3 HTTP/1.1
+
+###
+GET http://{{host}}:{{port}}/status_heartbeat?room_id=4 HTTP/1.1
+
+###
+GET http://{{host}}:{{port}}/status_heartbeat?room_id=5 HTTP/1.1
+
+
+###
+POST http://{{host}}:{{port}}/adjust_temperature HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+room_id=1&cur_temp=25&cur_speed=high&target_temp=20
+
+###
+POST http://{{host}}:{{port}}/adjust_temperature HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+room_id=2&cur_temp=25&cur_speed=mid&target_temp=27
+
+###
+POST http://{{host}}:{{port}}/adjust_temperature HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+room_id=3&cur_temp=25&cur_speed=high&target_temp=22
+
+###
+POST http://{{host}}:{{port}}/adjust_temperature HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+room_id=4&cur_temp=25&cur_speed=high&target_temp=28
+
+###
+POST http://{{host}}:{{port}}/adjust_temperature HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+room_id=5&cur_temp=25&cur_speed=mid&target_temp=20

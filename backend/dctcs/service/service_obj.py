@@ -1,6 +1,7 @@
 # -*- coding utf-8 -*-
 import datetime
 
+from dctcs.db.models import db_handler
 from dctcs.constdef.const import DEFAULT_TMP
 
 
@@ -24,6 +25,8 @@ class ServiceObj(object):
         self.priority = 0  # 调度优先级
         self.wait_clock = 0  # 队列等待时长
         self.service_clock = 0  # 队列服务时长
+
+        self.detailed_item_id = None
 
     def ini_room(self, room_id: int) -> bool:
         '''初始化服务房间号
@@ -106,4 +109,24 @@ class ServiceObj(object):
             else:
                 self.priority = 3
 
+        if not self.target_temp:
+            self.target_temp = self.temperature
+        if not self.target_fan_speed:
+            self.target_fan_speed = self.fan_speed
+
         return True
+
+    def start_serve(self):
+        # 开始计费
+        self.detailed_item_id = db_handler.use_air_conditioner(
+            room_id=self.room_id,
+            start_temp=self.temperature,
+            target_temp=self.target_temp,
+            mode='hot' if self.target_temp > self.temperature else 'cold',
+            speed=self.target_fan_speed if self.target_fan_speed else self.fan_speed,
+            fee_rate=1
+        )
+
+    def stop_serve(self):
+        # 停止计费
+        db_handler.stop_air_conditioner(self.detailed_item_id)

@@ -1,11 +1,16 @@
 # -*- coding utf-8 -*-
-from dctcs.schedule.scheduler import Scheduler
 from threading import Thread
+
 from dctcs.user.user import User
 from dctcs.db.models import db_handler
+from dctcs.constdef.const import DEFAULT_TMP
+from dctcs.schedule.scheduler import Scheduler
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 # 初始化温控系统
 scheduler = Scheduler()
@@ -26,10 +31,15 @@ t.start()
 
 @app.route('/check_in', methods=['POST'])
 def check_in():
+    room_id = db_handler.check_in()
+    # 初始化第一个调度请求
+    user = User(scheduler, room_id, DEFAULT_TMP, 'mid')
+    user.change_target_temp(DEFAULT_TMP)
+
     return jsonify(
         status=1,
         message='Check in successfully',
-        room_id=db_handler.check_in(),
+        room_id=room_id,
     )
 
 
@@ -37,7 +47,7 @@ def check_in():
 def adjust_temperature():
     room_id = int(request.form['room_id'])
     cur_temp = float(request.form['cur_temp'])
-    cur_speed = float(request.form['cur_speed'])
+    cur_speed = str(request.form['cur_speed'])
     target_temp = float(request.form['target_temp'])
 
     user = User(scheduler, room_id, cur_temp, cur_speed)
@@ -49,22 +59,37 @@ def adjust_temperature():
 
 @app.route('/adjust_wind', methods=['POST'])
 def adjust_wind():
-    pass
+    room_id = int(request.form['room_id'])
+    cur_temp = float(request.form['cur_temp'])
+    cur_speed = str(request.form['cur_speed'])
+    target_speed = str(request.form['target_speed'])
+
+    user = User(scheduler, room_id, cur_temp, cur_speed)
+    return jsonify(
+        status=1 if user.change_fan_speed(target_speed) else -1,
+        message='Adjust fan speed request received'
+    )
 
 
 @app.route('/status_heartbeat', methods=['GET'])
 def status_heartbeat():
-    # room_id = int(request.args.get('room_id'))
-    pass
+    room_id = int(request.args.get('room_id', -1))
+    status = scheduler.query(room_id)
+    return jsonify(
+        temperature=status[0],
+        speed=status[1],
+        electrical_usage=status[2],
+        fee=status[3],
+    )
 
 
 @app.route('/check_out', methods=['POST'])
 def check_out():
     room_id = int(request.form['room_id'])
-    bill, detailed_list = db_handler.check_out(room_id)
+    bill, detailed_list = scheduler.check_out(room_id)
     return jsonify(
         status=1,
-        message='Adjust temperature request received',
+        message='Check out successfully',
         bill=bill,
         detailed_list=detailed_list
     )

@@ -55,7 +55,7 @@ class ScheduleObj(object):
         Returns:
             bool 创建结果，True 为成功，False 为失败
         '''
-        self.service_object = self.scheduler.service_queue.create_service_obj(
+        self.service_object = self.scheduler.serv_queue.create_service_obj(
             self.room_id,
             self.room_temp,
             self.room_speed,
@@ -75,7 +75,7 @@ class ScheduleObj(object):
             bool 修改结果，True 为成功，False 为失败
         '''
         self.make_service_object(target_temp, None)
-        return self.scheduler.service_queue.add_wait(self.service_object)
+        return self.scheduler.serv_queue.add_wait(self.service_object)
 
     def change_fan_speed(self, fan_speed: str) -> bool:
         '''要求服务队列修改服务对象的风速
@@ -87,4 +87,4 @@ class ScheduleObj(object):
             bool 修改结果，True 为成功，False 为失败
         '''
         self.make_service_object(None, fan_speed)
-        return self.scheduler.service_queue.add_wait(self.service_object)
+        return self.scheduler.serv_queue.add_wait(self.service_object)
