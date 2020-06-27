@@ -219,5 +219,13 @@ class DataBase:
             fee += temp_fee
         return [temp_temp, speed, electrical_usage, fee]
 
+    def get_checked_in_room_info(self):
+        rooms = {}
+        checked_in_rooms = self.RoomTable.filter(is_empty=False)
+        for room in checked_in_rooms:
+            detailed_list = self.get_detailed_list(room.room_id)
+            rooms[room.room_id] = detailed_list
+        return rooms
+
 
 db_handler = DataBase()  # 实例化

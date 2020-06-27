@@ -36,7 +36,7 @@ export default function Layout({ children }) {
         <div className="panel">{children}</div>
         <footer>
           Powered by <a href="https://github.com/JmPotato/DCTCS">DCTCS</a> & Go
-          to <a href="https://github.com/JmPotato/DCTCS">Admin</a>
+          to <a href="/admin">Admin</a>
         </footer>
       </div>
     </div>

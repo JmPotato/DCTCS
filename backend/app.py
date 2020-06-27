@@ -98,16 +98,12 @@ def check_out():
 '''
 空调管理员侧相关接口
 
-* /get_room_list   获取当前已入住客房列表
-* /get_room_detail 获取客房详单
+* /get_room_detial_list   获取当前已入住客房列表及详单信息
 '''
 
 
-@app.route('/get_room_list', methods=['GET'])
-def get_room_list():
-    pass
-
-
-@app.route('/get_room_detail', methods=['GET'])
-def get_room_detail():
-    pass
+@app.route('/get_room_detial_list', methods=['GET'])
+def get_room_detial_list():
+    return jsonify(
+        rooms=db_handler.get_checked_in_room_info()
+    )
