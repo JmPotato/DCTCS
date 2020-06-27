@@ -17,6 +17,7 @@ class App extends React.Component {
       fee: 0,
       AC_state: 0, // 1表示空调处于开启状态，0表示关闭状态
       timeout: null,
+      check_in_time: null,
     }
   }
 
@@ -66,10 +67,14 @@ class App extends React.Component {
       body: form_data,
     })
       .then(response => {
-        response.json().then(_ => {
+        response.json().then(data => {
+          console.log(data)
+          clearInterval(this.state.timeout)
           this.setState({
             is_checked_in: false,
             is_checked_out: true,
+            fee: data.bill[2],
+            check_in_time: data.bill[1],
           })
         })
       })
@@ -207,7 +212,10 @@ class App extends React.Component {
             <div>
               {this.state.is_checked_out ? (
                 <div>
-                  <p>This is the checked out page. To be continued...</p>
+                  <p>
+                    Your room #{this.state.room_id}, check in at{" "}
+                    {this.state.check_in_time}, total fee: ${this.state.fee}
+                  </p>
                 </div>
               ) : (
                 <div>

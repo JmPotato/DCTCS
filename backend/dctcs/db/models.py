@@ -56,6 +56,8 @@ class DataBase:
         end_time = item.end_time
         if get_stat and item.end_time is None:
             end_time = datetime.datetime.now()
+        if item.end_time is None:
+            end_time = datetime.datetime.now()
         duration = ceil((end_time - item.start_time).seconds / 60)
         temp_change_rate = 0
         electrical_rate = 0
